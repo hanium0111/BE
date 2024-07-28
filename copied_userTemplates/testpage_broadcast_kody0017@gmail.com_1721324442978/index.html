@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Party Promotion</title>
+    <meta charset="utf-8">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        #banner {
+            background: url('images/party-banner.jpg') no-repeat center center;
+            background-size: cover;
+            padding: 100px 0;
+            text-align: center;
+        }
+        #banner .inner {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+        }
+        .button {
+            background-color: #ff0066;
+            color: #ffffff;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .button:hover {
+            background-color: #ff3399;
+        }
+        .scrolly {
+            cursor: pointer;
+        }
+        section {
+            padding: 50px 20px;
+        }
+        .party-images img {
+            width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<section id="banner" data-video="images/banner">
+    <div class="inner">
+        <header>
+            <h1>Welcome to the Ultimate Party</h1>
+            <p>Join us for an unforgettable night filled with music, dancing, and fun.<br>
+                Don't miss out on the party of the year!</p>
+        </header>
+        <a href="#main" class="button big alt scrolly">Explore More</a>
+    </div>
+</section>
+
+<section id="main">
+    <div class="party-images">
+        <img src="images/party1.jpg" alt="Party Image 1">
+        <img src="images/party2.jpg" alt="Party Image 2">
+        <img src="images/party3.jpg" alt="Party Image 3">
+    </div>
+</section>
+
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/jquery.scrolly.min.js"></script>
+<script src="assets/js/skel.min.js"></script>
+<script src="assets/js/util.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.scrolly').scrolly();
+    });
+</script>
+
+</body>
+</html>

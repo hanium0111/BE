@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Builder</title>
+  <link href="default.css" rel="stylesheet" type="text/css" media="all">
+  <link href="fonts.css" rel="stylesheet" type="text/css" media="all">
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  <style>
+    .draggable {
+      cursor: move;
+    }
+    #toolbar {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <button onclick="addElement('button')">Add Button</button>
+    <button onclick="addElement('textbox')">Add Textbox</button>
+  </div>
+  <div id="app">
+    <!-- 템플릿 컴포넌트들 -->
+    <div id="wrapper" class="draggable">
+      <div id="menu-wrapper" class="container">
+        <div id="menu" class="container">
+          <ul>
+            <li class="current_page_item"><a href="#">Homepage</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Portfolio</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+        <div id="header-wrapper" class="container">
+          <div id="header" class="container">
+            <div id="logo">
+              <h1><a href="#">GrassyGreen</a></h1>
+              <p>Design by <a href="http://templated.co" rel="nofollow">TEMPLATED</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="banner" class="draggable"></div>
+      <div id="page" class="container">
+        <div id="content" class="draggable">
+          <div class="title">
+            <h2>Integer sit amet aliquet</h2>
+            <span class="byline">Phasellus nec erat sit amet nibh pellentesque congue</span>
+          </div>
+          <p>This is <strong>GrassyGreen</strong>, a free, fully standards-compliant CSS template designed by <a href="http://templated.co" rel="nofollow">TEMPLATED</a>. The photos in this template are from <a href="http://fotogrph.com/"> Fotogrph</a>. This free template is released under the <a href="http://templated.co/license">Creative Commons Attribution</a> license, so you're pretty much free to do whatever you want with it (even use it commercially) provided you give us credit for it. Have fun :) </p>
+        </div>
+        <div id="sidebar" class="draggable">
+          <div class="box2">
+            <div class="title">
+              <h2>Integer gravida</h2>
+            </div>
+            <ul class="style2">
+              <li><a href="#">Amet turpis, feugiat et sit amet</a></li>
+              <li><a href="#">Ornare in hendrerit in lectus</a></li>
+              <li><a href="#">Semper mod quis eget mi dolore</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function addElement(type) {
+      const newElement = document.createElement(type === 'button' ? 'button' : 'input');
+      newElement.textContent = type === 'button' ? 'New Button' : '';
+      newElement.type = type === 'button' ? 'button' : 'text';
+      newElement.className = 'draggable';
+      document.getElementById('app').appendChild(newElement);
+      initializeDraggable(newElement);
+    }
+
+    function initializeDraggable(element) {
+      interact(element).draggable({
+        inertia: true,
+        modifiers: [
+          interact.modifiers.restrictRect({
+            restriction: 'parent',
+            endOnly: true
+          })
+        ],
+        autoScroll: true,
+        listeners: {
+          move(event) {
+            const target = event.target;
+            const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+            const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+            target.style.transform = `translate(${x}px, ${y}px)`;
+            target.setAttribute('data-x', x);
+            target.setAttribute('data-y', y);
+          }
+        }
+      });
+    }
+
+    document.querySelectorAll('.draggable').forEach(initializeDraggable);
+
+    document.getElementById('app').addEventListener('click', function(event) {
+      if (event.target.tagName === 'BUTTON' || event.target.tagName === 'INPUT') {
+        const newValue = prompt('Enter new value:', event.target.textContent || event.target.value);
+        if (event.target.tagName === 'BUTTON') {
+          event.target.textContent = newValue;
+        } else {
+          event.target.value = newValue;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
