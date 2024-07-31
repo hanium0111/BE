@@ -17,7 +17,7 @@ const app = express();
 
 // CORS 설정
 app.use(cors({
-  origin: 'http://localhost:4000', // 클라이언트 도메인
+  origin: 'http://3.39.238.139:3000', // 클라이언트 도메인
   credentials: true
 }));
 

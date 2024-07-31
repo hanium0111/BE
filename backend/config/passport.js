@@ -5,7 +5,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: 'https://bcde-125-176-145-224.ngrok-free.app/auth/google/callback'
+    callbackURL: 'localhost:3000/auth/google/callback' // 서버의 리다이렉트 주소
   },
   (accessToken, refreshToken, profile, done) => {
     console.log('Google profile:', profile);

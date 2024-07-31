@@ -9,11 +9,13 @@ exports.googleAuthCallback = passport.authenticate('google', { failureRedirect: 
 exports.authCallbackRedirect = async (req, res) => {
   try {
     await authService.handleAuthCallback(req);
+    const redirectUrl = '클라이언트 주소';
     res.send(`
       <html>
         <body>
           <script>
             window.opener.postMessage('authComplete', '*');
+             window.opener.location.href = "${redirectUrl}"; // 부모 창을 클라이언트의 주소로 리다이렉션
             window.close();
           </script>
         </body>
