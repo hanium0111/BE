@@ -11,7 +11,7 @@ const deploy = async (req, res) => {
   const commitMessage = req.body.commitMessage || 'Deploy template';
 
   try {
-    const result = await deployService.deployToGitHub(projectPath, commitMessage);
+    const result = await deployService.deployTemplate(projectPath, deployName,commitMessage);
     res.status(200).json({ message: 'Template deployed successfully', result });
   } catch (error) {
     res.status(500).json({ message: error.message });

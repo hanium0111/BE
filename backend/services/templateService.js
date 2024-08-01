@@ -48,11 +48,21 @@ exports.usesharedTemplate = async (templateId, pageName, userEmail) => {
   const newImagePath = path.join('page_screenshots', `${newDirName}.png`);
   await fs.copy(template.imagePath, newImagePath);
 
+  //newTemplatePath와 newImagePath를 상대경로로 변환
+
+  // 프로젝트 루트 디렉토리 설정
+  const projectRoot = path.resolve(__dirname, '../..');
+
+  // 상대 경로로 변환
+  const relative_newTemplatePath = path.relative(projectRoot, newTemplatePath);
+  const relative_newImagePath = path.relative(projectRoot, newImagePath);
+
+
   // dashboard 테이블에 저장
   const newDashboard = await Dashboard.create({
     projectName: pageName,
-    projectPath: newTemplatePath,
-    imagePath: newImagePath,
+    projectPath: relative_newTemplatePath,
+    imagePath: relative_newImagePath,
     shared: false,
     email: userEmail,
     like: 0,

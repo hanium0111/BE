@@ -34,7 +34,7 @@ exports.copyTemplate = (templatePath, outputDir) => {
 };
 
 // 배포 로직
-exports.deployTemplate = async (templatePath, deployName) => {
+exports.deployTemplate = async (templatePath, deployName,commitMessage) => {
     if (!fs.existsSync(templatePath)) {
         throw new Error(`Template path ${templatePath} does not exist.`);
     }
@@ -68,7 +68,7 @@ exports.deployTemplate = async (templatePath, deployName) => {
         throw error; // 에러가 발생하면 상위로 던져서 gitDeploy가 실행되지 않도록 함
     }
 
-    await exports.gitDeploy(outputDir, deployName);
+    await exports.gitDeploy(outputDir, deployName,commitMessage);
 };
 
 

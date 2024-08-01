@@ -49,7 +49,7 @@ exports.logout = (req, res, next) => {
         <html>
           <body>
             <script>
-              window.location.href = 'https://accounts.google.com/Logout?continue=https://appengine.google.com/_ah/logout?continue=https://bad8-125-176-145-224.ngrok-free.app/';
+              window.location.href = 'https://accounts.google.com/Logout?continue=https://appengine.google.com/_ah/logout?continue=https://1am11m.store/';
             </script>
           </body>
         </html>

@@ -132,7 +132,7 @@ exports.copyTemplate = async (input, analysis, userEmail ,pageName) => {
   }
   console.log("첫 번 째 스크린샷");
   // 로컬 서버 URL 설정
-  const localServerUrl = `http://localhost:3000/copied_userTemplates/${newTemplateDirName}/index.html`; // 스크린샷 url
+  const localServerUrl = `https://1am11m.store/copied_userTemplates/${newTemplateDirName}/index.html`; // 스크린샷 url
 
   // 스크린샷 파일 경로 설정
   const screenshotsDir = path.join(__dirname, "../../page_screenshots");
@@ -250,7 +250,7 @@ exports.modifyTemplate = async (templateDir, input) => {
         //console.log("db에서 가져온 템플릿이름:",projectName);
         // 로컬 서버 URL 설정
         console.log('템플릿 상대경로',templateDir.newTemplateDir_relative_path);
-        const localServerUrl = `http://localhost:3000${templateDir.newTemplateDir_relative_path}/index.html`; //스크린샷 url
+        const localServerUrl = `https://1am11m.store${templateDir.newTemplateDir_relative_path}/index.html`; //스크린샷 url
         console.log('로컬서버유알엘',localServerUrl)
         // 경로는 db에서 가져와야됨 == projectPath를 기반으로 db의 imagePath를 가져와야됨
        // const screenshotPath = dashboardDetails.dataValues.imagePath;
