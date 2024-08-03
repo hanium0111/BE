@@ -1,5 +1,6 @@
 // services/dashboardService.js
 const Dashboard = require('../models/dashboard');
+const SharedTemplates = require('../models/sharedTemplates');
 const fs = require('fs-extra');
 const path = require('path');
 
@@ -29,11 +30,14 @@ exports.getDashboardsByEmail = async (email) => {
 //대시보드 이름을 수정
 exports.updateDashboardName = async (id, newName) => {
   const dashboard = await Dashboard.findByPk(id);
+  const sharedTemplates =await SharedTemplates.findOne(dashboard.id);
   if (!dashboard) {
   throw new Error('Dashboard not found');
   }
   dashboard.ProjectName = newName;
+  sharedTemplates.templateName=newName;
   await dashboard.save();
+  await sharedTemplates.save();
   return dashboard;
  };
 
@@ -85,8 +89,10 @@ exports.shareDashboard = async (id, category, description, user) => {
     await fs.copy(originalImagePath, newImagePath);
   }
 
-  const sharedTemplate = await sharedTemplates.create({
+  const sharedTemplate = await SharedTemplates.create({
     displayName: user.displayName,
+    templateName:dashboard.ProjectName,
+    dashboardKey:dashboard.id,
     email: user.email,
     profileImageUrl: user.profileImageUrl,
     category,

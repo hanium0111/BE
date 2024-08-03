@@ -9,21 +9,11 @@ exports.googleAuthCallback = passport.authenticate('google', { failureRedirect: 
 exports.authCallbackRedirect = async (req, res) => {
   try {
     await authService.handleAuthCallback(req);
-    const redirectUrl = '클라이언트 주소';
-    res.send(`
-      <html>
-        <body>
-          <script>
-            window.opener.postMessage('authComplete', '*');
-             window.opener.location.href = "${redirectUrl}"; // 부모 창을 클라이언트의 주소로 리다이렉션
-            window.close();
-          </script>
-        </body>
-      </html>
-    `);
+    const redirectUrl = 'https://0111.site'; // 실제 클라이언트 주소로 변경
+    res.redirect(redirectUrl);
   } catch (err) {
     console.error(err);
-    res.redirect('/');
+    res.redirect('/https://0111.site/login');
   }
 };
 

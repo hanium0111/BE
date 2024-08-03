@@ -17,9 +17,11 @@ const app = express();
 
 // CORS 설정
 app.use(cors({
-  origin: 'http://3.39.238.139:3000', // 클라이언트 도메인
+  origin: 'https://0111.site', // 클라이언트 도메인
   credentials: true
 }));
+
+app.set('trust proxy', 1); // 프록시 신뢰 설정
 
 
 // JSON 및 URL 인코딩된 본문 파싱 미들웨어
@@ -41,7 +43,6 @@ app.use(session({
   } // 프로덕션에서는 true로 설정 (HTTPS)
 }));
 
-app.set('trust proxy', 1); // 프록시 신뢰 설정
 
 app.use(passport.initialize());
 app.use(passport.session());

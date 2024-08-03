@@ -7,6 +7,14 @@ const sharedTemplates = sequelize.define('sharedTemplates', {
     autoIncrement: true,
     primaryKey: true,
   },
+  dashboardKey: {
+    type: DataTypes.INTEGER,
+    unique: true
+  },
+  templateName: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
   displayName: {
     type: DataTypes.STRING,
     allowNull: false
@@ -51,6 +59,10 @@ const sharedTemplates = sequelize.define('sharedTemplates', {
     {
       unique: true,
       fields: ['imagePath']
+    },
+    {
+      unique: true,
+      fields: ['dashboardKey']
     }
   ]
 });

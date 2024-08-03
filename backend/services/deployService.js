@@ -68,59 +68,28 @@ exports.deployTemplate = async (templatePath, deployName,commitMessage) => {
         throw error; // 에러가 발생하면 상위로 던져서 gitDeploy가 실행되지 않도록 함
     }
 
-    await exports.gitDeploy(outputDir, deployName,commitMessage);
+    await exports.deployDirectoryToGitHub(deployName, commitMessage);
 };
 
-
-
-
-
-function zipDirectory(sourceDir, outPath) {
-    const archive = archiver('zip', { zlib: { level: 9 } });
-    const stream = fs.createWriteStream(outPath);
-
+// 디렉터리를 GitHub에 업로드하는 함수
+exports.deployDirectoryToGitHub = async (deployDir, commitMessage) => {
     return new Promise((resolve, reject) => {
-        archive
-            .directory(sourceDir, false)
-            .on('error', err => reject(err))
-            .pipe(stream);
+        const projectRoot = path.join(__dirname, '../../deployProjects');
+        const commands = [
+            `cd ${projectRoot}`,
+            `git add ${deployDir}`,
+            `git commit -m "${commitMessage}"`,
+            `git push origin ${GITHUB_BRANCH}`
+        ].join(' && ');
 
-        stream.on('close', () => resolve());
-        archive.finalize();
+        exec(commands, (err, stdout, stderr) => {
+            if (err) {
+                console.error(`Git command failed: ${stderr}`);
+                reject(err);
+            } else {
+                console.log(`Git command succeeded: ${stdout}`);
+                resolve(stdout);
+            }
+        });
     });
-}
-
-async function uploadFileToGitHub(filePath, commitMessage) {
-    const fileContent = fs.readFileSync(filePath, 'base64');
-    const fileName = path.basename(filePath);
-    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${fileName}`;
-
-    const data = {
-        message: commitMessage,
-        content: fileContent,
-        branch: GITHUB_BRANCH
-    };
-
-    const headers = {
-        'Authorization': `token ${GITHUB_TOKEN}`,
-        'Content-Type': 'application/json'
-    };
-
-    try {
-        const response = await axios.put(url, data, { headers });
-        return response.data;
-    } catch (error) {
-        throw new Error(`Failed to upload ${fileName}: ${error.message}`);
-    }
-}
-
-async function deployDirectoryToGitHub(dirPath, commitMessage) {
-    const zipPath = path.join(__dirname, 'temp.zip');
-    await zipDirectory(dirPath, zipPath);
-    await uploadFileToGitHub(zipPath, commitMessage);
-    fs.unlinkSync(zipPath); // 업로드 후 임시 zip 파일 삭제
-}
-
-module.exports = {
-    deployDirectoryToGitHub
 };
