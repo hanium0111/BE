@@ -7,7 +7,7 @@ const Dashboard = sequelize.define('Dashboard', {
     autoIncrement: true,
     primaryKey: true,
   },
-  ProjectName: {
+  projectName: {
     type: DataTypes.STRING,
     allowNull: false
   },

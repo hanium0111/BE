@@ -19,8 +19,7 @@ exports.usesharedTemplate = async (req, res) => {
     const { id } = req.params;  // 템플릿 ID
     const { pageName} = req.body;  // 페이지 이름
     const userEmail = req.user.email;  // 현재 로그인된 사용자의 이메일
-    
-    const newTemplatePath= await templateService.usesharedTemplate(id, pageName || '', userEmail);
+    const newTemplatePath= await templateService.usesharedTemplate(id, pageName, userEmail);
     res.status(200).json(newTemplatePath);
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -56,13 +56,17 @@ app.use((req, res, next) => {
 // 정적 파일 제공
 const copiedTemplatesPath = path.resolve(__dirname, '../../copied_userTemplates');
 const createdPagesPath = path.resolve(__dirname, '../../created_userPages');
-const sharedTemplatesPath = path.resolve(__dirname, '../../sharedTemplates');
+const sharedTemplatesPath = path.resolve(__dirname, '../../sharedTempcdlates');
 const frontendPath = path.resolve(__dirname, '../../frontend/public');
+const page_screenshotsPath=path.resolve(__dirname,'../../page_screenshots');
+const sharedpage_screenshotsPath =path.resolve(__dirname,'../../sharedpage_screenshots');
 
 app.use('/static', express.static(frontendPath));
 app.use('/copied_userTemplates', express.static(copiedTemplatesPath));
 app.use('/sharedTemplates', express.static(sharedTemplatesPath));
 app.use('/created_userPages', express.static(createdPagesPath));
+app.use('/page_screenshots', express.static(page_screenshotsPath));
+app.use('/sharedpage_screenshots', express.static(sharedpage_screenshotsPath));
 
 // 라우트 설정
 app.use('/auth', loginRoutes);

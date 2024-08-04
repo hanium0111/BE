@@ -148,7 +148,7 @@ exports.copyTemplate = async (input, analysis, userEmail ,pageName) => {
   
 
   const projectData = {
-    ProjectName: pageName,
+    projectName: pageName,
     projectPath: newTemplateDir_relative_path,
     imagePath: screenshotPath_relative_path,
     email: userEmail,
@@ -443,9 +443,26 @@ exports.createPage = async ( input, code, pageName, userEmail ) => {
 // 스크린샷 생성 함수
 async function captureScreenshot(url, outputPath) {
   const decodedUrl = decodeURIComponent(url); // URL 디코딩
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-gpu'
+    ]
+  });
   const page = await browser.newPage();
   await page.goto(decodedUrl, { waitUntil: 'networkidle2' });
+
+  // 페이지에 한글 폰트를 적용하기 위한 스타일 추가
+  await page.addStyleTag({ content: 'body { font-family: "Nanum Gothic", sans-serif; }' });
+
   await page.screenshot({ path: outputPath });
   await browser.close();
 }
+

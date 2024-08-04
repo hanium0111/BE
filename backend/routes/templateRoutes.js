@@ -6,10 +6,10 @@ const templateController = require('../controllers/templateController'); // temp
 router.get('/sharedTemplates/get', templateController.getAllsharedTemplates);
 
 // 템플릿 사용 라우트
-router.post('/sharedTemplate/:id/use', templateController.usesharedTemplate);
+router.post('/sharedTemplates/:id/use', templateController.usesharedTemplate);
 
 // 템플릿 좋아요 라우트
-router.post('/sharedTemplate/:id/like', templateController.likeTemplate);
+router.post('/sharedTemplates/:id/like', templateController.likeTemplate);
 
 
 module.exports = router; // 라우터를 모듈로 내보냅니다.

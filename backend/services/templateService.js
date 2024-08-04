@@ -32,30 +32,34 @@ exports.usesharedTemplate = async (templateId, pageName, userEmail) => {
   const template = await sharedTemplates.findByPk(templateId);
   if (!template) {
     throw new Error('Template not found');
-  }
+  }    
 
+  console.log("선택된 템플릿",template.id);
   const timestamp = Date.now();
   const newDirName = `${pageName}_${userEmail}_${timestamp}`;
-  const newTemplatePath = path.join('copied_userTemplates', newDirName);
+  const newTemplatePath = path.join(__dirname,'../..','copied_userTemplates', newDirName);
 
   // 디렉토리가 없는 경우 생성
   await fs.ensureDir(newTemplatePath);
 
+  //선택된 템플릿의 절대경로 추출
+  const selectTemplatePath=path.join(__dirname,'../..',template.templatePath);
   // 디렉터리 복사
-  await fs.copy(template.templatePath, newTemplatePath);
+  await fs.copy(selectTemplatePath, newTemplatePath);
 
   // 새로운 이미지 경로 설정
-  const newImagePath = path.join('page_screenshots', `${newDirName}.png`);
-  await fs.copy(template.imagePath, newImagePath);
+  const newImagePath = path.join(__dirname,'../..','page_screenshots', `${newDirName}.png`);
+  //선택된 템플릿의 이미지의 절대경로 추출
+  const selectTemplateImagePath=path.join(__dirname,'../..',`${template.imagePath}.png`);
+  await fs.copy(selectTemplateImagePath, newImagePath);
 
-  //newTemplatePath와 newImagePath를 상대경로로 변환
 
   // 프로젝트 루트 디렉토리 설정
   const projectRoot = path.resolve(__dirname, '../..');
 
   // 상대 경로로 변환
-  const relative_newTemplatePath = path.relative(projectRoot, newTemplatePath);
-  const relative_newImagePath = path.relative(projectRoot, newImagePath);
+  const relative_newTemplatePath = '/' +path.relative(projectRoot, newTemplatePath);
+  const relative_newImagePath = '/' +path.relative(projectRoot, newImagePath);
 
 
   // dashboard 테이블에 저장
@@ -65,7 +69,7 @@ exports.usesharedTemplate = async (templateId, pageName, userEmail) => {
     imagePath: relative_newImagePath,
     shared: false,
     email: userEmail,
-    like: 0,
+    likes: 0,
     publish: false,
     websiteType: template.category,
     features: '',
