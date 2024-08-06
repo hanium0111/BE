@@ -16,7 +16,7 @@ exports.createDashboard = async (req, res) => {
 exports.getDashboardsByEmail = async (req, res) => {
   try {
     if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      return res.redirect('https://0111.site/login');
     }
     const email = req.user.email;
     const dashboards = await DashboardService.getDashboardsByEmail(email);
@@ -30,11 +30,11 @@ exports.getDashboardsByEmail = async (req, res) => {
 exports.updateDashboardName = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: 'Unauthorized' });
+        return res.redirect('https://0111.site/login');
       }
-      const { id } = req.params;
-      const { newName } = req.body;
-      const updatedDashboard = await DashboardService.updateDashboardName(id, newName);
+      const id = req.params.id;
+      const { name } = req.body;
+      const updatedDashboard = await DashboardService.updateDashboardName(id, name);
       res.status(200).json(updatedDashboard);
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -45,7 +45,7 @@ exports.updateDashboardName = async (req, res) => {
 exports.getProjectPathById = async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: 'Unauthorized' });
+        return res.redirect('https://0111.site/login');
       }
       const { id } = req.params;
       const projectPath = await DashboardService.getProjectPathById(id);
@@ -59,7 +59,7 @@ exports.getProjectPathById = async (req, res) => {
 exports.shareDashboard = async (req, res) => {
   try {
     if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      return res.redirect('https://0111.site/login');
     }
     const { id } = req.params;
     const { category, description } = req.body;
@@ -82,9 +82,9 @@ exports.deleteDashboard = async (req, res) => {
 
   try {
     if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      return res.redirect('https://0111.site/login');
     }
-    const result = await dashboardService.deleteDashboard(dashboardId);
+    const result = await DashboardService.deleteDashboard(dashboardId);
 
     if (result === 0) {
       return res.status(404).json({ message: 'Dashboard not found' });
@@ -99,13 +99,13 @@ exports.deleteDashboard = async (req, res) => {
 //특정 대시보드 공유 중지
 exports.stopSharingDashboard = async (req, res) => {
   if (!req.isAuthenticated()) {
-    return res.status(401).json({ message: 'Unauthorized' });
+    return res.redirect('https://0111.site/login');
   }
   const dashboardId = req.params.id;
   const user = req.user; // 현재 로그인된 사용자의 정보
 
   try {
-    const result = await dashboardService.stopSharingDashboard(dashboardId, user);
+    const result = await DashboardService.stopSharingDashboard(dashboardId, user);
 
     res.status(200).json({ message: 'Dashboard sharing stopped successfully', dashboard: result });
   } catch (error) {

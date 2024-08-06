@@ -136,7 +136,7 @@ exports.copyTemplate = async (input, analysis, userEmail ,pageName) => {
 
   // 스크린샷 파일 경로 설정
   const screenshotsDir = path.join(__dirname, "../../page_screenshots");
-  const screenshotName=`${pageName}_${chosenTemplate.templateName}_${userEmail}`;
+  const screenshotName=`${pageName}_${chosenTemplate.templateName}_${userEmail}_${timestamp}`;
   const screenshotPath_absolute_path = path.join(screenshotsDir, `${screenshotName}.png`);
   let screenshotPath_relative_path = path.relative(projectRoot, screenshotPath_absolute_path);
   screenshotPath_relative_path = `/${screenshotPath_relative_path.replace(/\\/g, '/')}`;

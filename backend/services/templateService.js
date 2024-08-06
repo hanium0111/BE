@@ -50,7 +50,7 @@ exports.usesharedTemplate = async (templateId, pageName, userEmail) => {
   // 새로운 이미지 경로 설정
   const newImagePath = path.join(__dirname,'../..','page_screenshots', `${newDirName}.png`);
   //선택된 템플릿의 이미지의 절대경로 추출
-  const selectTemplateImagePath=path.join(__dirname,'../..',`${template.imagePath}.png`);
+  const selectTemplateImagePath=path.join(__dirname,'../..',`${template.imagePath}`);
   await fs.copy(selectTemplateImagePath, newImagePath);
 
 

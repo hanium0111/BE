@@ -30,16 +30,25 @@ exports.getDashboardsByEmail = async (email) => {
 //대시보드 이름을 수정
 exports.updateDashboardName = async (id, newName) => {
   const dashboard = await Dashboard.findByPk(id);
-  const sharedTemplates =await SharedTemplates.findOne(dashboard.id);
   if (!dashboard) {
-  throw new Error('Dashboard not found');
+    throw new Error('Dashboard not found');
   }
-  dashboard.ProjectName = newName;
-  sharedTemplates.templateName=newName;
+  if (dashboard.shared) {
+    const sharedTemplates = await SharedTemplates.findOne({
+      where: {
+        dashboardKey: dashboard.id
+      }
+    });
+    if (!sharedTemplates) {
+      throw new Error('Shared template not found');
+    }
+    sharedTemplates.templateName = newName;
+    await sharedTemplates.save();
+  }
+  dashboard.projectName = newName;
   await dashboard.save();
-  await sharedTemplates.save();
   return dashboard;
- };
+};
 
  //id를 키로 프로젝트 경로를 리턴. 사용자가 해당 대시보드 클릭 시 프로젝트 경로를 리턴하여 이어서 작업할 수 있도록 함
  exports.getProjectPathById = async (id) => {
@@ -91,7 +100,7 @@ exports.shareDashboard = async (id, category, description, user) => {
 
   const sharedTemplate = await SharedTemplates.create({
     displayName: user.displayName,
-    templateName:dashboard.ProjectName,
+    templateName:dashboard.projectName,
     dashboardKey:dashboard.id,
     email: user.email,
     profileImageUrl: user.profileImageUrl,
@@ -118,16 +127,20 @@ exports.deleteDashboard = async (dashboardId) => {
   const projectPath = dashboard.projectPath;
   const imagePath = dashboard.imagePath;
 
+  //절대경로
+  const project_absolute_path = path.join(__dirname, '../..',projectPath);
+  const image_absolute_path = path.join(__dirname, '../..',imagePath);
+
   try {
     // Dashboard 테이블에서 항목 삭제
     const result = await Dashboard.destroy({ where: { id: dashboardId } });
 
     // 파일 시스템에서 디렉터리 및 파일 삭제
     if (projectPath) {
-      await fs.remove(projectPath);
+      await fs.remove(project_absolute_path);
     }
     if (imagePath) {
-      await fs.remove(imagePath);
+      await fs.remove(image_absolute_path);
     }
 
     return result;
@@ -149,7 +162,7 @@ exports.stopSharingDashboard = async (id, user) => {
 
   // sharedTemplates 테이블에서 해당 항목을 삭제
   const templateName = path.basename(dashboard.projectPath); // 디렉토리 마지막 이름
-  const deletedTemplate = await sharedTemplates.findOne({
+  const deletedTemplate = await SharedTemplates.findOne({
     where: {
       email: user.email,
       templatePath: {
@@ -166,7 +179,7 @@ exports.stopSharingDashboard = async (id, user) => {
   const imagePath = deletedTemplate.imagePath;
 
   // sharedTemplates 테이블에서 항목 삭제
-  await sharedTemplates.destroy({
+  await SharedTemplates.destroy({
     where: {
       id: deletedTemplate.id
     }

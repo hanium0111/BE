@@ -16,6 +16,9 @@ exports.getAllsharedTemplates = async (req, res) => { // getTemplates라는 비�
 //shared템플릿을 사용하기를 클릭할 경우 템플릿을 복사합니다.
 exports.usesharedTemplate = async (req, res) => {
   try {
+    if (!req.isAuthenticated()) {
+      return res.redirect('https://0111.site/login');
+    }
     const { id } = req.params;  // 템플릿 ID
     const { pageName} = req.body;  // 페이지 이름
     const userEmail = req.user.email;  // 현재 로그인된 사용자의 이메일
@@ -29,6 +32,9 @@ exports.usesharedTemplate = async (req, res) => {
 //좋아요 클릭 시 숫자 증가
 exports.likeTemplate = async (req, res) => {
   try {
+    if (!req.isAuthenticated()) {
+      return res.redirect('https://0111.site/login');
+    }
     const { id } = req.params;  // 템플릿 ID
     const userEmail = req.user.email;  // 현재 로그인된 사용자의 이메일
 

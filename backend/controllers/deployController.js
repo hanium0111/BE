@@ -4,7 +4,7 @@ const path = require('path');
 
 const deploy = async (req, res) => {
   if (!req.isAuthenticated()) {
-    return res.status(401).json({ message: 'Unauthorized' });
+    return res.redirect('https://0111.site/login');
   }
   const deployName=req.body.deployName
   const projectPath = path.resolve(__dirname, '../../', req.body.projectPath); // 경로 수정
