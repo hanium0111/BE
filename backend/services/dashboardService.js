@@ -80,23 +80,32 @@ exports.shareDashboard = async (id, category, description, user) => {
     throw new Error('Dashboard not found');
   }
 
-  const originalTemplatePath = dashboard.projectPath; // e.g., 'copied_userTemplates/broadcast'
-  const originalImagePath = dashboard.imagePath;
+  // 루트 디렉터리 설정 (예: /projectRoot)
+  const rootDir = path.resolve(__dirname, '../../');
 
-  // 새로운 템플릿 경로 설정 (디렉터리 복사)
-  const newTemplatePath = path.join('sharedTemplates', originalTemplatePath.replace('copied_userTemplates', ''));
-  const newImagePath = path.join('sharedpage_screenshots', originalImagePath.replace('page_screenshots', ''));
+  //DB에서 대시보드의 오리지널 경로 받아옴 (상대경로)
+  const originalTemplatePath_relative = dashboard.projectPath; // e.g., 'copied_userTemplates/broadcast'
+  const originalImagePath_relative = dashboard.imagePath;
+
+  // DB에서 받아온 오리지널 경로를 절대경로로 수정
+  const originalTemplatePath_absolute = path.join(rootDir, originalTemplatePath_relative);
+  const originalImagePath_absolute = path.join(rootDir, originalImagePath_relative);
+
+  // 새로운 템플릿 절대 경로 설정 (디렉터리 복사)
+  const newTemplatePath_absolute = path.join(rootDir, 'sharedTemplates', originalTemplatePath_relative.replace('/copied_userTemplates', ''));
+  const newImagePath_absolute = path.join(rootDir, 'sharedpage_screenshots', originalImagePath_relative.replace('/page_screenshots', ''));
+
+  // 절대 경로를 루트 디렉터리를 기준으로 상대 경로로 변환하고 앞에 / 추가
+  const newTemplatePath_relative = '/' + path.relative(rootDir, newTemplatePath_absolute).replace(/\\/g, '/');
+  const newImagePath_relative = '/' + path.relative(rootDir, newImagePath_absolute).replace(/\\/g, '/');
 
   // 디렉토리가 없는 경우 생성
-  await fs.ensureDir(path.dirname(newTemplatePath));
-  await fs.ensureDir(path.dirname(newImagePath));
+  await fs.ensureDir(path.dirname(newTemplatePath_absolute));
+  await fs.ensureDir(path.dirname(newImagePath_absolute));
 
   // 디렉터리 복사
-  await fs.copy(originalTemplatePath, newTemplatePath);
-
-  if (originalImagePath) {
-    await fs.copy(originalImagePath, newImagePath);
-  }
+  await fs.copy(originalTemplatePath_absolute, newTemplatePath_absolute);
+  await fs.copy(originalImagePath_absolute, newImagePath_absolute);
 
   const sharedTemplate = await SharedTemplates.create({
     displayName: user.displayName,
@@ -104,10 +113,10 @@ exports.shareDashboard = async (id, category, description, user) => {
     dashboardKey:dashboard.id,
     email: user.email,
     profileImageUrl: user.profileImageUrl,
-    category,
-    templatePath: newTemplatePath,
-    imagePath: newImagePath,
-    description,
+    category: category,
+    templatePath: newTemplatePath_relative,
+    imagePath: newImagePath_relative,
+    description: description
   });
 
   dashboard.shared = true;
@@ -161,13 +170,9 @@ exports.stopSharingDashboard = async (id, user) => {
   }
 
   // sharedTemplates 테이블에서 해당 항목을 삭제
-  const templateName = path.basename(dashboard.projectPath); // 디렉토리 마지막 이름
   const deletedTemplate = await SharedTemplates.findOne({
     where: {
-      email: user.email,
-      templatePath: {
-        [Op.like]: `%/${templateName}`
-      }
+      dashboardKey: id
     }
   });
 
@@ -175,8 +180,13 @@ exports.stopSharingDashboard = async (id, user) => {
     throw new Error('Shared template not found or user does not have permission to delete it');
   }
 
-  const templatePath = deletedTemplate.templatePath;
-  const imagePath = deletedTemplate.imagePath;
+  //sharedTemplates 테이블에 저장된 경로 가져옴(상대경로)
+  const templatePath_relative = deletedTemplate.templatePath;
+  const imagePath_relative = deletedTemplate.imagePath;
+
+  //sharedTemplates 테이블에서 가져온 상대경로를 절대경로로 변경
+  const templatePath_absolute=path.join(__dirname, '../..',templatePath_relative);
+  const imagePath_absolute=path.join(__dirname, '../..',imagePath_relative);
 
   // sharedTemplates 테이블에서 항목 삭제
   await SharedTemplates.destroy({
@@ -186,9 +196,9 @@ exports.stopSharingDashboard = async (id, user) => {
   });
 
   // 파일 시스템에서 디렉터리 및 파일 삭제
-  await fs.remove(templatePath);
+  await fs.remove(templatePath_absolute);
   if (imagePath) {
-    await fs.remove(imagePath);
+    await fs.remove(imagePath_absolute);
   }
 
   // dashboard 테이블에서 shared 필드를 false로 업데이트

@@ -77,7 +77,7 @@ exports.usesharedTemplate = async (templateId, pageName, userEmail) => {
     content: '',
   });
 
-  return newTemplatePath;
+  return relative_newTemplatePath;
 };
   
 
