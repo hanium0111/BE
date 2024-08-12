@@ -11,6 +11,7 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_OWNER = process.env.GITHUB_OWNER;
 const GITHUB_REPO = process.env.GITHUB_REPO;
 const GITHUB_BRANCH = process.env.GITHUB_BRANCH;
+const GITHUB_USERNAME=process.env.GITHUB_USERNAME;
 
 
 // deployProjects 하위에 deployName 이름의 디렉터리 생성
@@ -41,17 +42,22 @@ exports.deployTemplate = async (id, deployName, commitMessage) => {
     if (!dashboard) {
         throw new Error(`Dashboard with id ${id} not found.`);
     }
-    const projectPath_relative = dashboard.projectPath;
-    const projectPath_absolute = path.join(__dirname, '../..', projectPath_relative);
-
-    if (!fs.existsSync(projectPath_absolute)) {
-        throw new Error(`Template path ${projectPath_absolute} does not exist.`);
+    if(dashboard.publish==true){
+      console.log('Already in deployment.');
+      throw new Error(`Already in deployment.`);
     }
 
     // 중복되는 deployName 확인
     const existingDeploy = await Deploy.findOne({ where: { deployName } });
     if (existingDeploy) {
          return { error: `Deploy name ${deployName} already exists.` };
+    }
+
+    const projectPath_relative = dashboard.projectPath;
+    const projectPath_absolute = path.join(__dirname, '../..', projectPath_relative);
+
+    if (!fs.existsSync(projectPath_absolute)) {
+        throw new Error(`Template path ${projectPath_absolute} does not exist.`);
     }
 
     const outputDir = exports.createDeployDirectory(deployName);
@@ -63,10 +69,12 @@ exports.deployTemplate = async (id, deployName, commitMessage) => {
     // 상대 경로로 변환
     const relativeOutputDir = path.relative(projectRoot, outputDir);
 
-    // DB에 데이터 삽입
+    await exports.deployDirectoryToGitHub(deployName, commitMessage);
+
+    // 배포 성공 시 DB에 데이터 삽입
     try {
         await Deploy.create({
-            templatePath: `/${projectPath_relative.replace(/\\/g, '/')}`,
+            templatePath: `${projectPath_relative.replace(/\\/g, '/')}`,
             deployProjectPath: `/${relativeOutputDir.replace(/\\/g, '/')}`,
             deployName: deployName
         });
@@ -76,11 +84,11 @@ exports.deployTemplate = async (id, deployName, commitMessage) => {
         throw error; // 에러가 발생하면 상위로 던져서 gitDeploy가 실행되지 않도록 함
     }
 
-    await exports.deployDirectoryToGitHub(deployName, commitMessage);
+    
 
     // 배포 완료 후 대시보드의 deploy 값을 true로 업데이트
     try {
-        dashboard.deploy = true;
+        dashboard.publish = true;
         await dashboard.save();
         console.log('Dashboard deploy status updated to true.');
         return deployName;
@@ -111,18 +119,20 @@ exports.stopDeploy = async (id) => {
     await exports.deleteDirectoryFromGitHub(deployName);
   
     // deployProjects의 해당 디렉터리 삭제
+    /*
     const outputDir = path.join(__dirname, '../../deployProjects', deployName);
     if (fs.existsSync(outputDir)) {
       fs.rmdirSync(outputDir, { recursive: true });
       console.log(`Directory ${outputDir} deleted.`);
     }
+    */
   
     // Deploy 테이블의 해당 항목 삭제
     await Deploy.destroy({ where: { deployName } });
   
     // Dashboard 테이블의 deploy 값을 false로 업데이트
     try {
-      dashboard.deploy = false;
+      dashboard.publish = false;
       await dashboard.save();
       console.log('Dashboard deploy status updated to false.');
     } catch (error) {
@@ -173,7 +183,7 @@ exports.deployDirectoryToGitHub = async (deployDir, commitMessage) => {
             `cd ${gitprojectRoot}`,
             `git add ${deployDir}`,
             `git commit -m "${commitMessage}"`,
-            `git push origin ${GITHUB_BRANCH}`
+            `git push https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/${GITHUB_OWNER}/${GITHUB_REPO}.git ${GITHUB_BRANCH}`
         ].join(' && ');
 
         exec(commands, (err, stdout, stderr) => {
@@ -197,7 +207,7 @@ exports.deleteDirectoryFromGitHub = async (deployDir) => {
         `cd ${gitprojectRoot}`,
         `git rm -r ${deployDir}`,
         `git commit -m "Remove ${deployDir}"`,
-        `git push origin ${GITHUB_BRANCH}`
+        `git push https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/${GITHUB_OWNER}/${GITHUB_REPO}.git ${GITHUB_BRANCH}`
       ].join(' && ');
   
       exec(commands, (err, stdout, stderr) => {

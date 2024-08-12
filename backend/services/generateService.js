@@ -47,7 +47,7 @@ exports.selectTemplate = async (input, templates) => {
   try {
     // GPT-4 API에 POST 요청을 보냅니다.
     const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-      model: "gpt-4o",
+      model: "gpt-4o mini",
       messages, // 메시지를 요청 본문에 포함합니다.
       max_tokens: 150, // 응답에서 최대 150개의 토큰을 반환하도록 설정합니다.
       n: 1,
@@ -201,7 +201,7 @@ exports.modifyTemplate = async (templateDir, input) => {
     try {
       // GPT-4 API에 POST 요청을 보냅니다.
       const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-        model: "gpt-4o",
+        model: "gpt-4o Mini",
         messages, // 메시지를 요청 본문에 포함합니다.
         max_tokens: 4096, // 응답에서 최대의 토큰을 반환하도록 설정합니다.
         n: 1,
@@ -238,23 +238,12 @@ exports.modifyTemplate = async (templateDir, input) => {
       }
 
       modifiedHtmlFiles.push({ htmlFilePath, modifiedHtmlContent });
-
-      console.log("indexHtmlModified:",indexHtmlModified);
       // index.html 파일이 수정된 경우 스크린샷을 찍습니다.
       if (indexHtmlModified) {
 
-         // 생성된 템플릿 디렉터리는 db에서 가져와야됨 == projectPath를 기반으로 db의 projectName을 가져와야됨
-       // const dashboardDetails = await dashboardService.getDashboardsByProjectPath(templateDir.newTemplateDir_relative_path);
-        
-       // const projectName = dashboardDetails.dataValues.projectName;
-        //console.log("db에서 가져온 템플릿이름:",projectName);
-        // 로컬 서버 URL 설정
-        console.log('템플릿 상대경로',templateDir.newTemplateDir_relative_path);
+  
         const localServerUrl = `https://1am11m.store${templateDir.newTemplateDir_relative_path}/index.html`; //스크린샷 url
-        console.log('로컬서버유알엘',localServerUrl)
-        // 경로는 db에서 가져와야됨 == projectPath를 기반으로 db의 imagePath를 가져와야됨
-       // const screenshotPath = dashboardDetails.dataValues.imagePath;
-       // console.log("스크린샷경로:",screenshotPath);
+       
        console.log('두번 째 스크린샷');
         await captureScreenshot(localServerUrl, templateDir.screenshotPath_absolute_path);
       }
@@ -305,6 +294,17 @@ const copyDirectory = (src, dest) => {
 };
 
 
+
+const chunkString = (str, size) => {
+  const numChunks = Math.ceil(str.length / size);
+  const chunks = new Array(numChunks);
+
+  for (let i = 0, o = 0; i < numChunks; i++, o += size) {
+    chunks[i] = str.substr(o, size);
+  }
+
+  return chunks;
+};
 
 /*
 exports.generateSRS = async ({ websiteType, features, mood, content }) => {
