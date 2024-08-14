@@ -6,6 +6,7 @@ const ncp = require('ncp').ncp;
 const { exec } = require('child_process');
 const Deploy = require('../models/deploy'); // 모델 파일 경로에 맞게 수정하세요
 const Dashboard = require('../models/dashboard'); // 모델 파일 경로에 맞게 수정하세요
+const dircompare = require('dir-compare'); // 디렉터리 비교를 위해 필요한 패키지
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_OWNER = process.env.GITHUB_OWNER;
@@ -89,6 +90,7 @@ exports.deployTemplate = async (id, deployName, commitMessage) => {
     // 배포 완료 후 대시보드의 deploy 값을 true로 업데이트
     try {
         dashboard.publish = true;
+        dashboard.deployPath=`https://hanium0111.github.io/CI-CD/${deployName}`
         await dashboard.save();
         console.log('Dashboard deploy status updated to true.');
         return deployName;
@@ -133,6 +135,7 @@ exports.stopDeploy = async (id) => {
     // Dashboard 테이블의 deploy 값을 false로 업데이트
     try {
       dashboard.publish = false;
+      dashboard.deployPath=null;
       await dashboard.save();
       console.log('Dashboard deploy status updated to false.');
     } catch (error) {
@@ -143,36 +146,46 @@ exports.stopDeploy = async (id) => {
 
  // 배포 업데이트 로직
 exports.updateDeploy = async (id, commitMessage) => {
-    const dashboard = await Dashboard.findOne({ where: { id } });
-    if (!dashboard) {
+  const dashboard = await Dashboard.findOne({ where: { id } });
+  if (!dashboard) {
       throw new Error(`Dashboard with id ${id} not found.`);
-    }
-  
-    const projectPath_relative = dashboard.projectPath;
-    const deployEntry = await Deploy.findOne({ where: { templatePath: projectPath_relative } });
-    if (!deployEntry) {
+  }
+
+  const projectPath_relative = dashboard.projectPath;
+  const deployEntry = await Deploy.findOne({ where: { templatePath: projectPath_relative } });
+  if (!deployEntry) {
       throw new Error(`Deploy entry not found for project path ${projectPath_relative}`);
-    }
-  
-    const deployName = deployEntry.deployName;
-    const projectPath_absolute = path.join(__dirname, '../..', projectPath_relative);
-  
-    if (!fs.existsSync(projectPath_absolute)) {
+  }
+
+  const deployName = deployEntry.deployName;
+  const projectPath_absolute = path.join(__dirname, '../..', projectPath_relative);
+
+  if (!fs.existsSync(projectPath_absolute)) {
       throw new Error(`Template path ${projectPath_absolute} does not exist.`);
-    }
-  
-    const outputDir = path.join(__dirname, '../../deployProjects', deployName);
-    if (!fs.existsSync(outputDir)) {
+  }
+
+  const outputDir = path.join(__dirname, '../../deployProjects', deployName);
+  if (!fs.existsSync(outputDir)) {
       throw new Error(`Deployment directory ${outputDir} does not exist.`);
-    }
-  
-    // 프로젝트 내용을 deployProjects 디렉터리에 덮어쓰기
-    await exports.copyTemplate(projectPath_absolute, outputDir);
-  
-    // GitHub에 업데이트 배포
-    await exports.deployDirectoryToGitHub(deployName, commitMessage);
-    return deployName;
-  };
+  }
+
+  // 디렉터리 비교 로직
+  const options = { compareContent: true };
+  const comparison = dircompare.compareSync(projectPath_absolute, outputDir, options);
+
+  if (comparison.same) {
+      
+      throw new Error(`No differences found between ${projectPath_absolute} and ${outputDir}. Deployment not needed.`);
+  }
+
+  // 프로젝트 내용을 deployProjects 디렉터리에 덮어쓰기
+  await exports.copyTemplate(projectPath_absolute, outputDir);
+
+  // GitHub에 업데이트 배포
+  await exports.deployDirectoryToGitHub(deployName, commitMessage);
+
+  return deployName;
+};
 
   
   // 디렉터리를 GitHub에 업로드하는 함수

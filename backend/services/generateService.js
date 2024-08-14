@@ -47,7 +47,7 @@ exports.selectTemplate = async (input, templates) => {
   try {
     // GPT-4 API에 POST 요청을 보냅니다.
     const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-      model: "gpt-4o mini",
+      model: "gpt-4o-mini",
       messages, // 메시지를 요청 본문에 포함합니다.
       max_tokens: 150, // 응답에서 최대 150개의 토큰을 반환하도록 설정합니다.
       n: 1,
@@ -190,9 +190,9 @@ exports.modifyTemplate = async (templateDir, input) => {
           - Mood: ${input.mood}
           - Content: ${input.content}
 
-          Modify the following HTML content to meet the user's requirements:
+        Modify the HTML content below to match the user's requirements, while preserving the original structure as much as possible. Only the content should be adjusted to meet the requirements:
 
-          ${htmlContent}
+        ${htmlContent}
         `
       }
     ];
@@ -201,9 +201,9 @@ exports.modifyTemplate = async (templateDir, input) => {
     try {
       // GPT-4 API에 POST 요청을 보냅니다.
       const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-        model: "gpt-4o Mini",
+        model: "gpt-4o-Mini",
         messages, // 메시지를 요청 본문에 포함합니다.
-        max_tokens: 4096, // 응답에서 최대의 토큰을 반환하도록 설정합니다.
+        max_tokens: 16384, // 응답에서 최대의 토큰을 반환하도록 설정합니다.
         n: 1,
         stop: null,
         temperature: 0.7

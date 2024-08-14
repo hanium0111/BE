@@ -11,6 +11,11 @@ const Dashboard = sequelize.define('Dashboard', {
     type: DataTypes.STRING,
     allowNull: false
   },
+  deployPath: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true
+  },
   projectPath: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -65,6 +70,10 @@ const Dashboard = sequelize.define('Dashboard', {
     {
       unique: true,
       fields: ['imagePath']
+    },
+    {
+      unique: true,
+      fields: ['deployPath']
     }
   ]
 });
