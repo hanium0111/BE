@@ -151,6 +151,7 @@ exports.copyTemplate = async (input, analysis, userEmail ,pageName) => {
     projectName: pageName,
     projectPath: newTemplateDir_relative_path,
     imagePath: screenshotPath_relative_path,
+    modified: false,
     email: userEmail,
     websiteType: input.websiteType || '',
     features: input.features || '',
@@ -465,4 +466,6 @@ async function captureScreenshot(url, outputPath) {
   await page.screenshot({ path: outputPath });
   await browser.close();
 }
+
+module.exports.captureScreenshot = captureScreenshot;
 

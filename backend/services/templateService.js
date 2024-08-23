@@ -67,6 +67,7 @@ exports.usesharedTemplate = async (templateId, pageName, userEmail) => {
     projectName: pageName,
     projectPath: relative_newTemplatePath,
     imagePath: relative_newImagePath,
+    modified: false,
     shared: false,
     email: userEmail,
     likes: 0,

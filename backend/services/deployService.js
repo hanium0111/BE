@@ -90,6 +90,7 @@ exports.deployTemplate = async (id, deployName, commitMessage) => {
     // 배포 완료 후 대시보드의 deploy 값을 true로 업데이트
     try {
         dashboard.publish = true;
+        dashboard.modified = false;
         dashboard.deployPath=`https://hanium0111.github.io/CI-CD/${deployName}`
         await dashboard.save();
         console.log('Dashboard deploy status updated to true.');
@@ -136,6 +137,7 @@ exports.stopDeploy = async (id) => {
     try {
       dashboard.publish = false;
       dashboard.deployPath=null;
+      dashboard.modified=false;
       await dashboard.save();
       console.log('Dashboard deploy status updated to false.');
     } catch (error) {
@@ -174,7 +176,7 @@ exports.updateDeploy = async (id, commitMessage) => {
   const comparison = dircompare.compareSync(projectPath_absolute, outputDir, options);
 
   if (comparison.same) {
-      
+
       throw new Error(`No differences found between ${projectPath_absolute} and ${outputDir}. Deployment not needed.`);
   }
 
@@ -183,6 +185,10 @@ exports.updateDeploy = async (id, commitMessage) => {
 
   // GitHub에 업데이트 배포
   await exports.deployDirectoryToGitHub(deployName, commitMessage);
+
+  // 업데이트 성공 시 dashboard.update를 false로 설정
+  dashboard.modified = false;
+  await dashboard.save();
 
   return deployName;
 };
@@ -218,7 +224,7 @@ exports.deleteDirectoryFromGitHub = async (deployDir) => {
       const gitprojectRoot = path.join(__dirname, '../../deployProjects');
       const commands = [
         `cd ${gitprojectRoot}`,
-        `git rm -r ${deployDir}`,
+        `git rm -rf ${deployDir}`,
         `git commit -m "Remove ${deployDir}"`,
         `git push https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/${GITHUB_OWNER}/${GITHUB_REPO}.git ${GITHUB_BRANCH}`
       ].join(' && ');

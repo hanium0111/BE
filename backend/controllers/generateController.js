@@ -9,7 +9,7 @@ exports.handleChatInput = async (req, res) => { // handleChatInput이라는 비�
      console.log("세션 정보:", req.session);
      console.log("사용자 정보:", req.user);
     if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      return res.redirect('https://0111.site/login');
     }
     // req.body에서 사용자 입력 데이터를 추출합니다.
     const { websiteType, features, mood, content , pageName } = req.body;

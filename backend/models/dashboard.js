@@ -21,6 +21,11 @@ const Dashboard = sequelize.define('Dashboard', {
     allowNull: false,
     unique: true
   },
+  modified: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    unique: false
+  },
   imagePath: {
     type: DataTypes.STRING,
     allowNull: true,
