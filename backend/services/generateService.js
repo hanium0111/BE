@@ -202,7 +202,7 @@ exports.modifyTemplate = async (templateDir, input) => {
     try {
       // GPT-4 API에 POST 요청을 보냅니다.
       const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-        model: "gpt-4o-Mini",
+        model: "gpt-4o-mini",
         messages, // 메시지를 요청 본문에 포함합니다.
         max_tokens: 16384, // 응답에서 최대의 토큰을 반환하도록 설정합니다.
         n: 1,

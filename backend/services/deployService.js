@@ -8,12 +8,13 @@ const Deploy = require('../models/deploy'); // 모델 파일 경로에 맞게 �
 const Dashboard = require('../models/dashboard'); // 모델 파일 경로에 맞게 수정하세요
 const dircompare = require('dir-compare'); // 디렉터리 비교를 위해 필요한 패키지
 
+/* github pages 비활성화
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_OWNER = process.env.GITHUB_OWNER;
 const GITHUB_REPO = process.env.GITHUB_REPO;
 const GITHUB_BRANCH = process.env.GITHUB_BRANCH;
 const GITHUB_USERNAME=process.env.GITHUB_USERNAME;
-
+*/
 
 // deployProjects 하위에 deployName 이름의 디렉터리 생성
 exports.createDeployDirectory = (deployName) => {
@@ -37,8 +38,20 @@ exports.copyTemplate = (templatePath, outputDir) => {
     });
 };
 
+// 디렉터리 삭제 함수
+exports.deleteDirectory = (dirPath) => {
+    return new Promise((resolve, reject) => {
+      fs.rm(dirPath, { recursive: true, force: true }, (err) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve();
+      });
+    });
+  };
+
 // 배포 로직
-exports.deployTemplate = async (id, deployName, commitMessage) => {
+exports.deployTemplate = async (id, deployName) => {
     const dashboard = await Dashboard.findOne({ where: { id } });
     if (!dashboard) {
         throw new Error(`Dashboard with id ${id} not found.`);
@@ -51,7 +64,8 @@ exports.deployTemplate = async (id, deployName, commitMessage) => {
     // 중복되는 deployName 확인
     const existingDeploy = await Deploy.findOne({ where: { deployName } });
     if (existingDeploy) {
-         return { error: `Deploy name ${deployName} already exists.` };
+        // return { error: `Deploy name ${deployName} already exists.` };
+        throw new Error(`Deploy name ${deployName} already exists.`);
     }
 
     const projectPath_relative = dashboard.projectPath;
@@ -70,7 +84,9 @@ exports.deployTemplate = async (id, deployName, commitMessage) => {
     // 상대 경로로 변환
     const relativeOutputDir = path.relative(projectRoot, outputDir);
 
+    /* github pages 비활성화
     await exports.deployDirectoryToGitHub(deployName, commitMessage);
+    */
 
     // 배포 성공 시 DB에 데이터 삽입
     try {
@@ -85,13 +101,11 @@ exports.deployTemplate = async (id, deployName, commitMessage) => {
         throw error; // 에러가 발생하면 상위로 던져서 gitDeploy가 실행되지 않도록 함
     }
 
-    
-
     // 배포 완료 후 대시보드의 deploy 값을 true로 업데이트
     try {
         dashboard.publish = true;
         dashboard.modified = false;
-        dashboard.deployPath=`https://hanium0111.github.io/CI-CD/${deployName}`
+        dashboard.deployPath=`https://1am11m.store/publish/${deployName}`
         await dashboard.save();
         console.log('Dashboard deploy status updated to true.');
         return deployName;
@@ -115,21 +129,28 @@ exports.stopDeploy = async (id) => {
     if (!deployEntry) {
       throw new Error(`Deploy entry not found for project path ${projectPath_relative}`);
     }
-  
+    
     const deployName = deployEntry.deployName;
+   
   
+    /* github pages 비활성화
     // GitHub에서 해당 디렉터리 삭제
     await exports.deleteDirectoryFromGitHub(deployName);
-  
-    // deployProjects의 해당 디렉터리 삭제
-    /*
-    const outputDir = path.join(__dirname, '../../deployProjects', deployName);
-    if (fs.existsSync(outputDir)) {
-      fs.rmdirSync(outputDir, { recursive: true });
-      console.log(`Directory ${outputDir} deleted.`);
-    }
     */
-  
+
+    // 배포 중지 시 deployProjects 의 해당 디렉터리 삭제하기  root/deployProjects/deployName인 디렉터리를 삭제하면됨
+    const deployProjectPath_relative = deployEntry.deployProjectPath;
+    const deployProjectPath_absolute = path.join(__dirname, '../..', deployProjectPath_relative);
+
+    // 디렉터리 삭제 시도
+    try {
+        await exports.deleteDirectory(deployProjectPath_absolute);
+        console.log(`Directory at path ${deployProjectPath_absolute} has been deleted.`);
+      } catch (error) {
+        console.error('Error deleting deploy directory:', error);
+        throw error;
+    }
+
     // Deploy 테이블의 해당 항목 삭제
     await Deploy.destroy({ where: { deployName } });
   
@@ -147,7 +168,7 @@ exports.stopDeploy = async (id) => {
   };
 
  // 배포 업데이트 로직
-exports.updateDeploy = async (id, commitMessage) => {
+exports.updateDeploy = async (id) => {
   const dashboard = await Dashboard.findOne({ where: { id } });
   if (!dashboard) {
       throw new Error(`Dashboard with id ${id} not found.`);
@@ -183,8 +204,10 @@ exports.updateDeploy = async (id, commitMessage) => {
   // 프로젝트 내용을 deployProjects 디렉터리에 덮어쓰기
   await exports.copyTemplate(projectPath_absolute, outputDir);
 
+  /* github pages 비활성화
   // GitHub에 업데이트 배포
   await exports.deployDirectoryToGitHub(deployName, commitMessage);
+  */
 
   // 업데이트 성공 시 dashboard.update를 false로 설정
   dashboard.modified = false;
@@ -194,6 +217,9 @@ exports.updateDeploy = async (id, commitMessage) => {
 };
 
   
+
+
+/* github pages 비활성화함
   // 디렉터리를 GitHub에 업로드하는 함수
 exports.deployDirectoryToGitHub = async (deployDir, commitMessage) => {
     return new Promise((resolve, reject) => {
@@ -218,6 +244,8 @@ exports.deployDirectoryToGitHub = async (deployDir, commitMessage) => {
 };
 
 
+
+
 // GitHub에서 디렉터리 삭제하는 함수
 exports.deleteDirectoryFromGitHub = async (deployDir) => {
     return new Promise((resolve, reject) => {
@@ -240,3 +268,4 @@ exports.deleteDirectoryFromGitHub = async (deployDir) => {
       });
     });
 };
+*/

@@ -2,17 +2,16 @@
 const deployService = require('../services/deployService');
 const path = require('path');
 
-//githubpage에 배포
+//배포
 const deploy = async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.redirect('https://0111.site/login');
   }
   const deployName=req.body.deployName;
   const id = req.body.id;
-  const commitMessage = req.body.commitMessage || 'Deploy template';
 
   try {
-    const result = await deployService.deployTemplate(id, deployName,commitMessage);
+    const result = await deployService.deployTemplate(id, deployName);
     res.status(200).json({ message: 'Template deployed successfully', result });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -40,10 +39,9 @@ const updateDeploy = async (req, res) => {
     return res.redirect('https://0111.site/login');
   }
   const id = req.body.id;
-  const commitMessage = req.body.commitMessage || 'Update deployed template';
 
   try {
-    const result = await deployService.updateDeploy(id, commitMessage);
+    const result = await deployService.updateDeploy(id);
     res.status(200).json({ message: 'Deployment updated successfully', result });
   } catch (error) {
     res.status(500).json({ message: error.message });

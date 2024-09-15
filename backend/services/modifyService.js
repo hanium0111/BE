@@ -13,7 +13,15 @@ exports.modifyElement = async (domElement, modificationRequest) => {
           },
           {
               role: "user",
-              content: `Modify the following DOM element as requested and return only the modified element.\n\nDOM Element:\n${domElement}\n\nModification:\n${modificationRequest}\n\nModified Element:`
+              content: `Modify the following DOM element as requested and return only the modified element without including any additional characters or symbols.
+
+DOM Element:
+${domElement}
+
+Modification:
+${modificationRequest}
+
+Return only the modified element:`
           }
       ];
 
@@ -108,19 +116,16 @@ exports.modifyEntirePage = async (filePath, modificationRequest) => {
         const messages = [
             {
                 role: "system",
-                content: "You are an expert assistant skilled in modifying and enhancing HTML pages. Your task is to carefully follow the user's instructions to make precise modifications to the HTML content."
+                content: "You are a helpful assistant."
             },
             {
                 role: "user",
-                content: `Please modify the entire HTML page as per the following requirements. Ensure that the modifications align with the provided instructions.
-
+                content: `Modify the HTML content below to match the user's requirements
 Current HTML:
 ${htmlContent}
 
 Modification Requirements:
-${modificationRequest}
-
-Please return the modified HTML page content without any additional comments or explanations, only the modified HTML code:`
+${modificationRequest}`
             }
         ];
 
@@ -138,14 +143,20 @@ Please return the modified HTML page content without any additional comments or 
         });
 
         // GPT의 응답에서 수정된 페이지 콘텐츠 추출
-        const gptGeneratedPage = response.data.choices[0].message.content.trim();
+        let gptGeneratedPage = response.data.choices[0].message.content.trim();
+
+        // HTML 태그만 추출하기 위한 정규 표현식 사용
+        const htmlMatch = gptGeneratedPage.match(/<!DOCTYPE html>[\s\S]*<html[^>]*>([\s\S]*?)<\/html>/i);
+        if (htmlMatch) {
+            gptGeneratedPage = htmlMatch[0];
+        }
 
         // 수정된 HTML 페이지 내용을 덮어쓰는 방식으로 저장
         await fs.promises.writeFile(htmlFilePath, gptGeneratedPage, 'utf8');
 
 
         // dashboard.imagePath를 절대 경로로 변환
-            const screenshotAbsolutePath = path.join(__dirname, '../..', dashboard.imagePath);
+        const screenshotAbsolutePath = path.join(__dirname, '../..', dashboard.imagePath);
 
         const localServerUrl = `https://1am11m.store${directoryPath}/index.html`;
         
