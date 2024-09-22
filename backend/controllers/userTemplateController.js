@@ -46,6 +46,15 @@ exports.modifyFileWithGpt = async (req, res) => {
         if (domElement == '선택한 요소가 없습니다.') {
           // 선택된 요소가 없는 경우, 페이지 전체를 수정
           gptGeneratedElement = await modifyService.modifyEntirePage(path, modificationRequest);
+        } else if (domElement.startsWith('<img')) {
+          // DOM 요소가 이미지인 경우 특정 서비스 함수 호출
+
+          // DOM 요소의 형식을 원본 템플릿의 형식으로 수정
+          domElement = await modifyService.modifyDomElement(path,domElement);
+
+          gptGeneratedElement = await modifyService.modifyImageElement(domElement, modificationRequest);
+          await modifyService.updateHtmlFile(path, domElement, gptGeneratedElement);
+          
         } else {
           // GPT로 Dom Element와 수정사항을 기반으로 새로운 코드 생성
           gptGeneratedElement = await modifyService.modifyElement(domElement, modificationRequest);

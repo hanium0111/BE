@@ -61,6 +61,7 @@ const frontendPath = path.resolve(__dirname, '../../frontend/public');
 const page_screenshotsPath=path.resolve(__dirname,'../../page_screenshots');
 const sharedpage_screenshotsPath =path.resolve(__dirname,'../../sharedpage_screenshots');
 const deployProject=path.resolve(__dirname,'../../deployProjects');
+const imageStore=path.resolve(__dirname,'../../imageStore');
 
 app.use('/static', express.static(frontendPath));
 app.use('/copied_userTemplates', express.static(copiedTemplatesPath));
@@ -69,6 +70,7 @@ app.use('/created_userPages', express.static(createdPagesPath));
 app.use('/page_screenshots', express.static(page_screenshotsPath));
 app.use('/sharedpage_screenshots', express.static(sharedpage_screenshotsPath));
 app.use('/publish',express.static(deployProject));
+app.use('imageStore',express.static(imageStore));
 
 // 라우트 설정
 app.use('/auth', loginRoutes);
